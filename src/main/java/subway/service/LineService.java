@@ -7,6 +7,7 @@ import subway.domain.entity.Section;
 import subway.domain.entity.Station;
 import subway.domain.request.LineRequest;
 import subway.domain.response.LineResponse;
+import subway.domain.response.SectionResponse;
 import subway.repository.LineRepository;
 import subway.repository.SectionRepository;
 
@@ -17,12 +18,14 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LineService {
     private final StationService stationService;
+    private final SectionService sectionService;
     private final LineRepository lineRepository;
     private final SectionRepository sectionRepository;
 
-    public LineService(LineRepository lineRepository, StationService stationService, SectionRepository sectionRepository) {
+    public LineService(LineRepository lineRepository, StationService stationService, SectionService sectionService, SectionRepository sectionRepository) {
         this.lineRepository = lineRepository;
         this.stationService = stationService;
+        this.sectionService = sectionService;
         this.sectionRepository = sectionRepository;
     }
 
@@ -51,7 +54,6 @@ public class LineService {
     public LineResponse updateLine(Long id, LineRequest request) {
         Line line = lineRepository.findById(id).get();
 
-        // Todo
         Line newLine = new Line(line.getId(), request.getName(), request.getColor(), line.getUpStation(), line.getDownStation(), line.getDistance());
 
         Line updatedLine = lineRepository.save(newLine);
@@ -81,6 +83,8 @@ public class LineService {
         );
     }
 
-
-
+    public SectionResponse findSection(Long id, Long sectionId) {
+        Section section = sectionRepository.findByLineIdAndId(id, sectionId);
+        return sectionService.createSectionResponse(section);
+    }
 }

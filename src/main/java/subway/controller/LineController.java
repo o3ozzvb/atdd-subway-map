@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import subway.domain.request.LineRequest;
 import subway.domain.request.SectionRequest;
 import subway.domain.response.LineResponse;
+import subway.domain.response.SectionResponse;
 import subway.service.LineService;
 import subway.service.SectionService;
 
@@ -50,14 +51,19 @@ public class LineController {
     }
 
     @PostMapping("/{id}/sections")
-    public ResponseEntity<Void> addSection(@PathVariable("id") Long id, @RequestBody SectionRequest sectionRequest) {
-        sectionService.addSection(id, sectionRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SectionResponse> addSection(@PathVariable("id") Long id, @RequestBody SectionRequest sectionRequest) {
+        SectionResponse section = sectionService.addSection(id, sectionRequest);
+        return ResponseEntity.created(URI.create("/lines/" + id + "/sections/" + section.getId())).body(section);
     }
 
     @DeleteMapping("/{id}/sections")
     public ResponseEntity<Void> deleteSection(@PathVariable("id") Long id, @RequestParam("stationId") Long stationId) {
         sectionService.deleteSection(id, stationId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value = "/{id}/sections/{sectionId}")
+    public ResponseEntity<SectionResponse> showSection(@PathVariable("id") Long id, @RequestBody Long sectionId) {
+        return ResponseEntity.ok().body(lineService.findSection(id, sectionId));
     }
 }

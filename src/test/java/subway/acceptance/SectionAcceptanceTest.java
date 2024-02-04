@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import subway.domain.entity.Section;
 import subway.domain.request.LineRequest;
+import subway.domain.response.SectionResponse;
 import subway.exception.ExceptionMessage;
 import subway.exception.ExceptionResponse;
 import subway.util.StationTestUtil;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static subway.util.LineTestUtil.createSubwayLine;
 import static subway.util.LineTestUtil.getLine;
 import static subway.util.SectionTestUtil.addSection;
@@ -48,15 +50,23 @@ public class SectionAcceptanceTest {
     void addSectionTest() {
         //given
         Map<String, Object> params = new HashMap<>();
+        int distance = 10;
         params.put("upStationId", stationId2);
         params.put("downStationId", stationId3);
-        params.put("distance", 10);
+        params.put("distance", distance);
 
         //when
         ExtractableResponse<Response> response = addSection(params, lineId);
+        SectionResponse sectionResponse = response.as(SectionResponse.class);
 
         // then
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+        assertAll(
+                () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value()),
+                () -> assertThat(sectionResponse.getLine().getId()).isEqualTo(lineId),
+                () -> assertThat(sectionResponse.getUpStation().getId()).isEqualTo(stationId2),
+                () -> assertThat(sectionResponse.getDownStation().getId()).isEqualTo(stationId3),
+                () -> assertThat(sectionResponse.getDistance()).isEqualTo(distance)
+        );
     }
 
     /**

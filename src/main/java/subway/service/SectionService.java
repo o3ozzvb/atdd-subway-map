@@ -6,6 +6,7 @@ import subway.domain.entity.Line;
 import subway.domain.entity.Section;
 import subway.domain.entity.Station;
 import subway.domain.request.SectionRequest;
+import subway.domain.response.SectionResponse;
 import subway.exception.ApplicationException;
 import subway.exception.ExceptionMessage;
 import subway.repository.LineRepository;
@@ -18,14 +19,16 @@ import java.util.List;
 public class SectionService {
     private final StationService stationService;
     private final LineRepository lineRepository;
+    private final SectionRepository sectionRepository;
 
-    public SectionService(StationService stationService, LineRepository lineRepository) {
+    public SectionService(StationService stationService, LineRepository lineRepository, SectionRepository sectionRepository) {
         this.stationService = stationService;
         this.lineRepository = lineRepository;
+        this.sectionRepository = sectionRepository;
     }
 
     @Transactional
-    public void addSection(Long lineId, SectionRequest sectionRequest) {
+    public SectionResponse addSection(Long lineId, SectionRequest sectionRequest) {
         Line line = lineRepository.findById(lineId).get();
         Station upStation = stationService.findById(sectionRequest.getUpStationId());
         Station downStation = stationService.findById(sectionRequest.getDownStationId());
@@ -47,7 +50,9 @@ public class SectionService {
             throw new ApplicationException(ExceptionMessage.NEW_SECTION_VALIDATION_EXCEPTION.getMessage());
         }
 
-        line.addSection(upStation, downStation, sectionRequest.getDistance());
+        Section newSection = new Section(line, upStation, downStation, sectionRequest.getDistance());
+        line.addSection(newSection);
+        return createSectionResponse(newSection);
     }
 
     private boolean isRegisteredStation(List<Section> sections, Station station) {
@@ -76,5 +81,20 @@ public class SectionService {
         }
 
         line.deleteSection(section);
+    }
+
+    public SectionResponse findSectionByLineIdAndId(Long lineId, Long sectionId) {
+        Section section = sectionRepository.findByLineIdAndId(lineId, sectionId);
+        return createSectionResponse(section);
+    }
+
+    public SectionResponse createSectionResponse(Section section) {
+        return new SectionResponse(
+                section.getId(),
+                section.getLine(),
+                section.getUpStation(),
+                section.getDownStation(),
+                section.getDistance()
+        );
     }
 }

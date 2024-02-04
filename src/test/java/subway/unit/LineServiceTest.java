@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import subway.domain.entity.Line;
+import subway.domain.entity.Section;
 import subway.domain.entity.Station;
 import subway.domain.request.SectionRequest;
 import subway.repository.LineRepository;
@@ -33,7 +34,8 @@ class LineServiceTest {
         Station 선릉역 = stationRepository.save(new Station("선릉역"));
 
         Line line = new Line("이호선", "초록색");
-        line.addSection(강남역, 역삼역, 10);
+        Section section = new Section(line, 강남역, 역삼역, 10);
+        line.addSection(section);
         lineRepository.save(line);
 
         // when
@@ -55,7 +57,8 @@ class LineServiceTest {
         Station 선릉역 = stationRepository.save(new Station("선릉역"));
 
         Line line = new Line("이호선", "초록색");
-        line.addSection(강남역, 역삼역, 10);
+        Section section = new Section(line, 강남역, 역삼역, 10);
+        line.addSection(section);
         lineRepository.save(line);
         sectionService.addSection(line.getId(), new SectionRequest(역삼역.getId(), 선릉역.getId(), 10));
 
