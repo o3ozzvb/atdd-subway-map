@@ -57,11 +57,13 @@ public class Line {
         this.color = color;
     }
 
-    public void addSection(Station upStation, Station downStation, int distance) {
-        this.sections.add(new Section(this, upStation, downStation, distance));
+    public void addSection(Section section) {
+        this.sections.add(section);
+        this.distance += section.getDistance();
     }
 
     public void deleteSection(Section section) {
         this.sections.remove(section);
+        this.distance -= section.getDistance();
     }
 }
